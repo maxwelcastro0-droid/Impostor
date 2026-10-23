@@ -1,0 +1,19 @@
+{
+  "name": "QUEM É O IMPOSTOR?",
+  "short_name": "Impostor",
+  "description": "Jogo presencial de mistério e dedução social",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#100d1c",
+  "theme_color": "#100d1c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
