@@ -3,7 +3,7 @@
 {
   "name": "QUEM É O IMPOSTOR?",
   "short_name": "Impostor",
-  "description": "Descubra quem é o impostor neste jogo de dedução e mistério!",
+  "description": "Jogo de dedução e mistério",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -12,7 +12,7 @@
   "theme_color": "#080914",
   "icons": [
     {
-      "src": "./icone.png",
+      "src": "./icone_quem_e_o_impostor_512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
