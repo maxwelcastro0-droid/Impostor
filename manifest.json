@@ -1,0 +1,17 @@
+
+{
+  "name": "QUEM É O IMPOSTOR?",
+  "short_name": "Impostor",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101014",
+  "theme_color": "#101014",
+  "icons": [
+    {
+      "src": "./file_00000000fb74820e9ea2ceb967a618cc.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
