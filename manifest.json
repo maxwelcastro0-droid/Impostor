@@ -1,17 +1,21 @@
 
+
 {
   "name": "QUEM É O IMPOSTOR?",
   "short_name": "Impostor",
+  "description": "Descubra quem é o impostor neste jogo de dedução e mistério!",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#101014",
-  "theme_color": "#101014",
+  "orientation": "portrait",
+  "background_color": "#080914",
+  "theme_color": "#080914",
   "icons": [
     {
-      "src": "./https://github.com/maxwelcastro0-droid/Impostor/blob/main/1792855554223.jpg",
+      "src": "./icone.png",
       "sizes": "512x512",
-      "type": "image/jpg"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
