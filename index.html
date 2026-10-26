@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b16">
+<title>Quem é o Impostor?</title>
+<style>
+:root {
+  --bg:#080b16; --panel:#11182a; --panel2:#1a2540;
+  --text:#f5f7ff; --muted:#a4b0cb; --accent:#9275ff;
+  --green:#43e6ad; --red:#ff637d; --border:#34415f80;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; min-height:100vh; padding:16px 12px 36px;
+  color:var(--text); font-family:Inter,system-ui,-apple-system,sans-serif;
+  background:
+    radial-gradient(ellipse at 10% 0%,#30245c 0,transparent 38%),
+    radial-gradient(ellipse at 100% 30%,#102e4b 0,transparent 35%),
+    var(--bg);
+}
+#app { max-width:720px; margin:auto; }
+header { text-align:center; padding:16px 0 25px; }
+.logo {
+  display:inline-grid; place-items:center; width:74px; height:74px;
+  border-radius:25px; font-size:37px;
+  background:linear-gradient(135deg,#ad99ff,#6650ed 60%,#4d9bff);
+  box-shadow:0 0 45px #8166ff40; border:1px solid #ffffff30;
+}
+h1 { font-size:clamp(27px,6vw,42px); letter-spacing:-1.5px; margin:14px 0 5px; font-weight:950; }
+.subtitle { color:var(--muted); margin:0; }
+.panel {
+  background:linear-gradient(145deg,#151e34f5,#0e1527f5);
+  border:1px solid var(--border); border-radius:23px;
+  padding:21px; margin-bottom:15px; box-shadow:0 18px 55px #0003;
+}
+h2 { font-size:25px; letter-spacing:-.6px; margin:12px 0; }
+h3 { margin:0 0 10px; }
+label { display:block; font-weight:750; margin:15px 0 8px; }
+input,textarea,select {
+  width:100%; background:#0a1020; color:var(--text);
+  border:1px solid #34415f; border-radius:14px; padding:13px;
+  font:inherit; outline:none; transition:border-color .2s,box-shadow .2s;
+}
+input:focus,textarea:focus,select:focus {
+  border-color:var(--accent); box-shadow:0 0 0 3px #9275ff20;
+}
+textarea { min-height:140px; resize:vertical; }
+button {
+  border:1px solid transparent; border-radius:14px; padding:13px 16px;
+  font:inherit; font-weight:800; cursor:pointer;
+  transition:transform .15s,filter .15s;
+}
+button:hover { filter:brightness(1.08); }
+button:active { transform:scale(.98); }
+button:disabled { opacity:.35; cursor:not-allowed; }
+.primary {
+  width:100%; margin-top:15px; color:white;
+  background:linear-gradient(110deg,#8268ff,#5d70f5);
+  box-shadow:0 8px 25px #705cff30;
+}
+.success { width:100%; margin-top:15px; color:#05281e; background:linear-gradient(110deg,#55f0ba,#38dca5); }
+.secondary { color:var(--text); background:var(--panel2); border-color:var(--border); }
+.danger { color:#ffdce3; background:#3a1a2a; border-color:#9c3b57; }
+.small { padding:9px 12px; font-size:13px; }
+.top-actions { display:flex; justify-content:flex-end; margin-bottom:12px; }
+.sound-controls {
+  position: static;
+  display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center;
+  align-items: center; gap: 8px; margin: 0 auto 18px;
+}
+.sound-toggle {
+  position: relative;
+  padding: 10px 13px;
+  border-radius: 30px;
+  color: white;
+  background: #1a2540;
+  border: 1px solid #9275ff80;
+  box-shadow: 0 0 18px #9275ff20;
+  font-size: 13px;
+}
+.volume-control {
+  display: block; margin: 0; padding: 9px 12px; width: min(240px, 100%);
+  color: white; background: #1a2540; border: 1px solid #9275ff80;
+  border-radius: 14px; font-size: 12px; box-shadow: 0 0 18px #9275ff20;
+}
+.volume-control span { display:flex; justify-content:space-between; gap:8px; }
+.volume-control input { width:100%; padding:0; margin:8px 0 0; accent-color:#9275ff; }
+.badge {
+  display:inline-flex; align-items:center; gap:6px; padding:7px 11px;
+  border-radius:999px; background:#8c75ff1c; color:#c9bdff;
+  border:1px solid #9c89ff35; font-size:11px; font-weight:900; letter-spacing:1px;
+}
+.muted { color:var(--muted); line-height:1.65; }
+.notice {
+  padding:14px; margin:13px 0; border-radius:15px;
+  background:#0a1122; border:1px solid var(--border); line-height:1.6;
+}
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+.card-secret {
+  margin-top:18px; padding:22px; text-align:center; border-radius:21px;
+  background:linear-gradient(145deg,#292452,#121d38);
+  border:1px solid #8e7bff80; box-shadow:inset 0 0 35px #8673ff0b;
+}
+.secret { margin:14px 0; font-size:clamp(26px,6vw,38px); font-weight:950; letter-spacing:-.8px; overflow-wrap:anywhere; }
+.player-row,.vote-row {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:13px 2px; border-bottom:1px solid var(--border);
+}
+.player-row:last-child,.vote-row:last-child { border-bottom:0; }
+.vote-row label { display:flex; align-items:center; gap:12px; flex:1; margin:0; cursor:pointer; }
+.vote-row input { width:19px; height:19px; accent-color:var(--accent); }
+.pill {
+  flex-shrink:0; padding:6px 10px; border-radius:999px; font-size:12px;
+  font-weight:800; background:#27334e; color:#d9e2ff;
+}
+.hidden { display:none !important; }
+.footer-note { text-align:center; font-size:12px; color:var(--muted); margin-top:13px; }
+@media(max-width:480px) {
+  body { padding:10px 10px 28px; }
+  header { padding-top:12px; }
+  .panel { padding:17px; border-radius:20px; }
+  .grid { grid-template-columns:1fr; gap:2px; }
+  button { min-height:46px; }
+}
+
+/* Cronômetro da fase de perguntas */
+.timer-card { margin:16px 0; padding:18px; border:1px solid #43e6ad60; border-radius:18px; text-align:center; background:linear-gradient(145deg,#102e35,#101a2b); }
+.timer-display { font-size:clamp(38px,10vw,54px); line-height:1.15; font-weight:950; font-variant-numeric:tabular-nums; letter-spacing:2px; margin:8px 0 14px; }
+.timer-controls { display:flex; gap:9px; justify-content:center; flex-wrap:wrap; }
+.timer-controls button { flex:1; min-width:105px; }
+.timer-status { color:var(--muted); font-size:13px; margin:0 0 12px; }
+.timer-display.time-up { color:var(--red); animation:pulseReveal .8s ease-in-out infinite alternate; }
+
+/* Perguntas rápidas e revelação cinematográfica */
+.question-card {
+  margin:18px 0; padding:20px; text-align:center; border-radius:20px;
+  background:radial-gradient(ellipse at top,#382d70,#11182a 75%);
+  border:1px solid #9b86ff80; box-shadow:0 0 30px #8166ff18;
+}
+.question-label { color:#c9bdff; font-size:11px; font-weight:900; letter-spacing:1.5px; }
+.question-text { margin:12px 0 8px; font-size:clamp(20px,5vw,27px); font-weight:900; line-height:1.25; }
+.question-tip { color:var(--muted); font-size:13px; margin:0; }
+#roleReveal { overflow:hidden; position:relative; }
+.reveal-intro { color:#c9bdff; font-weight:900; letter-spacing:2px; animation:pulseReveal 1s ease-in-out infinite alternate; }
+#roleReveal .reveal-role-text { opacity:0; transform:scale(.72); filter:blur(8px); }
+#roleReveal.revealed .reveal-role-text { animation:cinematicReveal .8s cubic-bezier(.16,1,.3,1) forwards; }
+#roleReveal.revealed { animation:revealGlow 1.2s ease-out; }
+@keyframes cinematicReveal {
+  0% { opacity:0; transform:scale(.72); filter:blur(8px); letter-spacing:5px; }
+  65% { opacity:1; transform:scale(1.08); filter:blur(0); }
+  100% { opacity:1; transform:scale(1); filter:blur(0); letter-spacing:normal; }
+}
+@keyframes pulseReveal { from { opacity:.45; } to { opacity:1; text-shadow:0 0 18px #a997ff; } }
+@keyframes revealGlow { 0% { box-shadow:0 0 0 #9275ff00; } 45% { box-shadow:0 0 55px #9275ff80; } 100% { box-shadow:0 0 25px #9275ff20; } }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-intro, #roleReveal.revealed, #roleReveal.revealed .reveal-role-text { animation:none !important; }
+  #roleReveal .reveal-role-text { opacity:1; transform:none; filter:none; }
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">🕵️</div>
+    <h1>QUEM É O IMPOSTOR?</h1>
+    <p class="subtitle">Descubra quem está blefando.</p>
+  </header>
+  <div class="sound-controls">
+    <button id="soundToggle" class="sound-toggle" type="button">🔊 Som ligado</button>
+    <label class="volume-control" for="soundVolume">
+      <span>🔉 Volume <strong id="volumeValue">100%</strong></span>
+      <input id="soundVolume" type="range" min="0" max="100" step="5" value="100" aria-label="Volume dos efeitos sonoros">
+    </label>
+  </div>
+  <main id="gameContent"></main>
+</div>
+<audio id="revealEffect" src="cinematic-boom-suspense-reveal-bass.mp3" preload="auto"></audio>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+// Sistema de áudio: efeitos sonoros, sem música de fundo.
+let audioContext = null;
+let masterGain = null;
+let soundVolume = 1;
+let soundEnabled = true;
+const revealEffect = document.getElementById("revealEffect");
+
+function initAudio() {
+  if (!audioContext) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return false;
+    audioContext = new AudioCtx();
+    masterGain = audioContext.createGain();
+    masterGain.gain.value = soundEnabled ? soundVolume : 0;
+    masterGain.connect(audioContext.destination);
+  }
+  if (audioContext.state === "suspended") audioContext.resume();
+  return true;
+}
+
+function playTone(frequency, duration, type = "sine", volume = 0.08, endFrequency = frequency) {
+  if (!soundEnabled || !initAudio()) return;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  const now = audioContext.currentTime;
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, now);
+  oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), now + duration);
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.linearRampToValueAtTime(volume, now + Math.min(0.08, duration / 3));
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  oscillator.connect(gain); gain.connect(masterGain);
+  oscillator.start(now); oscillator.stop(now + duration + 0.04);
+}
+
+function playCinematicFallback() {
+  // Efeito grave sintetizado de reserva caso o MP3 escolhido não esteja ao lado do HTML.
+  if (!soundEnabled || !initAudio()) return;
+  playTone(95, 1.15, "sawtooth", 0.11, 28);
+  setTimeout(() => playTone(52, 1.65, "sine", 0.18, 24), 180);
+  setTimeout(() => playTone(780, 0.16, "triangle", 0.045, 180), 220);
+}
+
+function startAmbient() { /* Música de fundo removida intencionalmente. */ }
+function stopAmbient() { if (revealEffect) { revealEffect.pause(); revealEffect.currentTime = 0; } }
+
+function playSound(eventName) {
+  if (!soundEnabled) return;
+  if (eventName === "reveal") {
+    if (revealEffect) {
+      revealEffect.volume = soundVolume;
+      revealEffect.currentTime = 0;
+      const playback = revealEffect.play();
+      if (playback && typeof playback.catch === "function") playback.catch(playCinematicFallback);
+      return;
+    }
+    playCinematicFallback(); return;
+  }
+  if (eventName === "card") { playTone(440, 0.12, "sine", 0.07); setTimeout(() => playTone(330, 0.2, "sine", 0.05), 90); }
+  if (eventName === "vote") playTone(520, 0.09, "triangle", 0.06);
+  if (eventName === "suspense") { playTone(75, 0.85, "sawtooth", 0.045, 38); setTimeout(() => playTone(58, 1.0, "sine", 0.055, 30), 300); }
+  if (eventName === "win") { playTone(392, 0.2, "sine", 0.06); setTimeout(() => playTone(523, 0.3, "sine", 0.06), 180); setTimeout(() => playTone(659, 0.45, "sine", 0.06), 360); }
+  if (eventName === "lose") { playTone(220, 0.3, "triangle", 0.06); setTimeout(() => playTone(165, 0.5, "triangle", 0.06), 220); }
+}
+
+function updateSoundButton() {
+  const button = $("soundToggle");
+  if (button) button.textContent = soundEnabled ? "🔊 Efeitos ligados" : "🔇 Efeitos desligados";
+}
+
+$("soundToggle").addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  if (soundEnabled) initAudio(); else stopAmbient();
+  if (initAudio() && masterGain) masterGain.gain.setTargetAtTime(soundEnabled ? soundVolume : 0, audioContext.currentTime, 0.03);
+  updateSoundButton();
+});
+
+$("soundVolume").addEventListener("input", event => {
+  soundVolume = Number(event.target.value) / 100;
+  $("volumeValue").textContent = `${event.target.value}%`;
+  if (revealEffect) revealEffect.volume = soundVolume;
+  if (initAudio() && masterGain) masterGain.gain.setTargetAtTime(soundEnabled ? soundVolume : 0, audioContext.currentTime, 0.03);
+});
+
+const escapeHTML = value => String(value).replace(/[&<>"']/g, ch => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[ch]));
+
+const BANK = [
+{category:"Animais",secret:"Girafa",clue:"Tem um pescoço comprido.",hints:["É um animal.","Pode viver na natureza.","Tem quatro patas.","É um mamífero.","Alimenta-se de plantas.","É mais alto que muitos animais.","Vive em regiões quentes.","Tem padrões no corpo.","Pode ser visto em zoológicos.","É conhecido pelo pescoço longo."]},
+{category:"Comidas",secret:"Pizza",clue:"É uma comida redonda.",hints:["É um alimento.","Pode ser compartilhada.","É popular em muitos países.","Pode ter vários sabores.","Costuma ser servida quente.","Pode levar queijo.","É comum em festas.","Pode ser cortada em fatias.","Tem várias coberturas possíveis.","É comum pedir por entrega."]},
+{category:"Objetos",secret:"Guarda-chuva",clue:"Ajuda em dias chuvosos.",hints:["É um objeto.","Pode ser levado na mão.","Ajuda em certas condições do tempo.","Pode abrir e fechar.","Existem modelos de várias cores.","É útil fora de casa.","Pode ficar molhado.","Costuma ter uma haste.","Pode proteger da chuva.","É usado em dias chuvosos."]},
+{category:"Lugares",secret:"Escola",clue:"É um lugar de aprendizagem.",hints:["É um lugar.","Muitas pessoas vão até lá regularmente.","Pode ter várias salas.","Há regras para seguir.","Pessoas trabalham nesse local.","Pode ter um pátio.","É frequentado por crianças e jovens.","É um espaço coletivo.","Pode ter uma biblioteca.","É ligado à aprendizagem."]},
+{category:"Tecnologia",secret:"Celular",clue:"Cabe na mão e conecta pessoas.",hints:["É um objeto tecnológico.","Pode ser carregado no bolso.","Tem várias funções.","Pode emitir sons.","Pode ser usado diariamente.","Pode ter uma tela sensível ao toque.","Precisa de energia.","Pode acessar a internet.","Permite comunicação à distância.","É usado para chamadas e mensagens."]},
+{category:"Profissões",secret:"Bombeiro",clue:"Ajuda em situações de emergência.",hints:["É uma profissão.","Pode exigir treinamento.","Ajuda outras pessoas.","Pode trabalhar em equipe.","Usa equipamentos de proteção.","Pode atender emergências.","Seu trabalho pode ser arriscado.","Pode usar uniforme especial.","É associado a veículos de emergência.","Combate incêndios."]},
+{category:"Transportes",secret:"Avião",clue:"Transporta pessoas pelo céu.",hints:["É um meio de transporte.","Pode levar muitas pessoas.","Precisa de um local específico para embarque.","Faz viagens curtas e longas.","É usado em diferentes países.","Pode transportar cargas.","Tem motores.","É operado por profissionais treinados.","Viaja entre cidades e países.","Voa pelo céu."]},
+{category:"Natureza",secret:"Vulcão",clue:"Pode expelir lava.",hints:["É uma formação natural.","Pode ser encontrado em diferentes regiões.","Pode permanecer inativo por muito tempo.","Está ligado ao calor interno da Terra.","Pode ter uma abertura no topo.","Pode produzir fumaça e cinzas.","Alguns ficam perto de placas tectônicas.","Pode alterar a paisagem.","Pode entrar em erupção.","Pode expelir lava."]},
+{category:"Esportes",secret:"Futebol",clue:"É jogado com uma bola e dois gols.",hints:["É uma atividade esportiva.","Pode ser praticado em equipe.","Exige movimento físico.","Tem regras próprias.","Pode ter competições.","É popular no Brasil.","Pode ser jogado em um campo.","Os jogadores usam uniformes.","O objetivo envolve marcar gols.","É jogado principalmente com os pés."]},
+{category:"Música",secret:"Bateria",clue:"É um instrumento de percussão.",hints:["Está ligada à música.","Pode ser usada em uma banda.","Produz sons.","Pode ter diferentes tamanhos.","Exige coordenação para tocar.","Pode marcar o ritmo.","Alguns modelos são eletrônicos.","Costuma ser tocada com baquetas.","Tem tambores e pratos em muitos modelos.","É um instrumento de percussão."]},
+{category:"Filmes e histórias",secret:"Dragão",clue:"É uma criatura fantástica.",hints:["É conhecido em histórias.","Pode aparecer em jogos.","Tem diferentes representações culturais.","Pode ser enorme ou pequeno nas ficções.","Às vezes guarda tesouros nas histórias.","Pode ter asas em muitas versões.","É comum em mundos de fantasia.","Pode aparecer em animações.","Algumas histórias o mostram soltando fogo.","É uma criatura fantástica."]},
+{category:"Casa",secret:"Geladeira",clue:"Ajuda a conservar alimentos.",hints:["É um objeto doméstico.","Fica em muitas cozinhas.","Usa energia elétrica.","Tem uma porta.","Pode guardar bebidas.","Existem modelos de vários tamanhos.","Ajuda a manter coisas em determinada temperatura.","Pode ter prateleiras.","É útil para armazenar alimentos.","Mantém alimentos refrigerados."]},
+{category:"Espaço",secret:"Lua",clue:"É visível no céu noturno.",hints:["É um corpo celeste.","Pode ser vista da Terra.","Sua aparência muda ao longo do mês.","Está ligada às marés terrestres.","Não produz luz própria como uma estrela.","Tem crateras em sua superfície.","Foi visitada por astronautas.","Orbita um planeta.","É o satélite natural da Terra.","Pode aparecer cheia no céu."]},
+{category:"Roupas",secret:"Tênis",clue:"É usado nos pés.",hints:["É um item de uso pessoal.","Pode ter cadarços.","Existem modelos esportivos.","Pode ter várias cores.","É vendido em diferentes tamanhos.","Pode ser usado no dia a dia.","Ajuda a proteger os pés.","Alguns modelos são feitos para correr.","Pode ter sola de borracha.","É um tipo de calçado."]}
+];
+
+/*
+ * Conteúdos variados para Mestre.
+ * Não precisam ser apenas palavras: podem ser situações, acontecimentos,
+ * conceitos, cenários e mistérios.
+ */
+const MESTRE_BANK = [
+{
+  category:"Situação hipotética",
+  secret:"Um elevador para entre dois andares durante um apagão",
+  clue:"Uma situação inesperada impede que algo continue normalmente.",
+  hints:[
+    "Algo interrompe uma rotina.",
+    "O ambiente fica diferente do habitual.",
+    "As pessoas precisam decidir como agir.",
+    "A situação pode causar tensão.",
+    "A solução depende de entender o que aconteceu.",
+    "Nem tudo está sob controle dos envolvidos.",
+    "O tempo de espera pode aumentar a preocupação.",
+    "Há um obstáculo que precisa ser superado.",
+    "A comunicação pode ser importante.",
+    "A situação começa com uma interrupção inesperada."
+  ]
+},
+{
+  category:"Mistério",
+  secret:"Todas as câmeras de uma loja registram o mesmo minuto em branco",
+  clue:"Várias evidências apresentam uma falha aparentemente impossível.",
+  hints:[
+    "Há um problema com registros.",
+    "A falha aparece em mais de uma fonte.",
+    "O intervalo ausente pode ser importante.",
+    "Alguém precisa investigar o que ficou de fora.",
+    "A coincidência torna o caso suspeito.",
+    "Os registros deveriam ajudar a reconstruir os fatos.",
+    "A ausência de informação vira uma pista.",
+    "A investigação depende de comparar evidências.",
+    "O mistério envolve um período específico.",
+    "O que não foi registrado pode ser tão importante quanto o resto."
+  ]
+},
+{
+  category:"Acontecimento",
+  secret:"Uma cidade inteira acorda com todos os relógios atrasados exatamente 13 minutos",
+  clue:"Um fenômeno afeta muitas pessoas de forma sincronizada.",
+  hints:[
+    "O problema é percebido por várias pessoas.",
+    "Acontece sem aviso prévio.",
+    "Objetos comuns passam a indicar algo estranho.",
+    "A coincidência parece difícil de explicar.",
+    "O fenômeno afeta a rotina.",
+    "Existe uma diferença mensurável.",
+    "A população tenta encontrar uma causa.",
+    "O detalhe importante é igual para todos.",
+    "O acontecimento pode gerar teorias diferentes.",
+    "A situação envolve a passagem do tempo."
+  ]
+},
+{
+  category:"Estratégia",
+  secret:"Vencer uma partida sem revelar qual era o objetivo verdadeiro",
+  clue:"O sucesso depende de esconder a intenção até o momento certo.",
+  hints:[
+    "O plano envolve outras pessoas.",
+    "Nem todos conhecem a meta real.",
+    "As decisões precisam parecer naturais.",
+    "A estratégia depende de observar os outros.",
+    "Uma atitude precipitada pode revelar demais.",
+    "Há objetivos diferentes em jogo.",
+    "A interpretação dos acontecimentos importa.",
+    "O resultado pode surpreender quem observa.",
+    "O segredo está na intenção, não só na ação.",
+    "A vitória depende de manter uma informação escondida."
+  ]
+},
+{
+  category:"Cenário fictício",
+  secret:"Uma estação espacial recebe uma mensagem enviada por ela mesma no futuro",
+  clue:"Uma comunicação desafia a ordem normal dos acontecimentos.",
+  hints:[
+    "A história acontece longe da vida cotidiana.",
+    "Uma mensagem é central para o mistério.",
+    "A origem da informação é o problema principal.",
+    "Os personagens precisam decidir se confiam no aviso.",
+    "O conteúdo pode alterar decisões futuras.",
+    "A comunicação parece impossível à primeira vista.",
+    "O tempo tem um papel importante.",
+    "O remetente e o destinatário têm uma ligação incomum.",
+    "A mensagem provoca uma investigação.",
+    "O mistério envolve uma mensagem que parece vir do próprio destino."
+  ]
+},
+{
+  category:"Investigação",
+  secret:"Três testemunhas descrevem o mesmo acontecimento de maneiras incompatíveis",
+  clue:"Relatos sobre um único fato entram em conflito.",
+  hints:[
+    "Há mais de uma versão da história.",
+    "Os relatos não podem ser todos verdadeiros da mesma maneira.",
+    "A memória pode influenciar o que cada pessoa conta.",
+    "Detalhes aparentemente pequenos podem ser decisivos.",
+    "O investigador precisa comparar as versões.",
+    "Uma testemunha pode estar enganada.",
+    "Outra pessoa pode ter entendido algo de forma diferente.",
+    "A contradição é o ponto central.",
+    "Não basta escolher o relato mais convincente.",
+    "A solução exige examinar as evidências."
+  ]
+}
+];
+
+/*
+ * Mentalista: conteúdos variados e pistas individuais.
+ * Investigadores veem o segredo e a própria pista.
+ * Impostores veem apenas a própria pista.
+ */
+const MENTALISTA_BANK = [
+{
+  category:"Caso fictício",
+  secret:"O desaparecimento de uma cidade inteira durante uma noite",
+  hints:[
+    "Há algo que deixou de existir de forma repentina.",
+    "O acontecimento envolve muitas pessoas ao mesmo tempo.",
+    "Não há uma explicação confirmada para o ocorrido.",
+    "O lugar afetado era habitado antes do acontecimento.",
+    "O mistério começa quando alguém percebe a ausência.",
+    "As pistas deixadas para trás parecem contraditórias.",
+    "O caso provoca perguntas sobre o que realmente aconteceu.",
+    "A situação muda completamente a vida de quem investigava.",
+    "O acontecimento é lembrado como um grande mistério.",
+    "Encontrar respostas exige reconstruir os fatos."
+  ]
+},
+{
+  category:"Cinema",
+  secret:"Um filme em que os sonhos podem ser invadidos",
+  hints:[
+    "A história mistura realidade e algo que acontece durante o sono.",
+    "Os personagens precisam distinguir o que é verdadeiro.",
+    "Uma missão depende de entrar na mente de outra pessoa.",
+    "O tempo não funciona da mesma maneira em todos os lugares da história.",
+    "O protagonista carrega dúvidas sobre a própria realidade.",
+    "A equipe precisa planejar uma operação muito delicada.",
+    "O cenário pode mudar conforme a mente de alguém.",
+    "A história envolve camadas de experiências mentais.",
+    "O objetivo vai além de descobrir um segredo.",
+    "O final faz o público questionar o que acabou de assistir."
+  ]
+},
+{
+  category:"Crime fictício",
+  secret:"O roubo de uma obra de arte durante um apagão",
+  hints:[
+    "Algo valioso desaparece de um local protegido.",
+    "O momento escolhido dificulta a vigilância.",
+    "A investigação procura descobrir quem aproveitou a oportunidade.",
+    "Várias pessoas podem ter motivos diferentes.",
+    "A falta de luz é uma parte importante do caso.",
+    "O responsável pode ter planejado tudo antes.",
+    "Uma pista aparentemente insignificante pode resolver o mistério.",
+    "O local do acontecimento precisa ser examinado.",
+    "Os investigadores precisam separar fatos de suposições.",
+    "O caso envolve um objeto valioso que desapareceu."
+  ]
+},
+{
+  category:"Conceito",
+  secret:"O efeito dominó",
+  hints:[
+    "Uma pequena mudança pode iniciar uma sequência.",
+    "Os acontecimentos se conectam uns aos outros.",
+    "O resultado final pode ser muito maior que o começo.",
+    "Interromper o processo cedo pode mudar tudo.",
+    "Uma ação pode desencadear outras sem contato direto com o objetivo final.",
+    "A ordem dos acontecimentos é importante.",
+    "O primeiro movimento pode parecer insignificante.",
+    "Cada etapa influencia a seguinte.",
+    "A sequência pode ser planejada ou acidental.",
+    "Uma causa inicial desencadeia uma cadeia de consequências."
+  ]
+},
+{
+  category:"Jogo",
+  secret:"Uma partida em que vencer exige convencer os adversários de que você está perdendo",
+  hints:[
+    "A aparência do resultado pode enganar.",
+    "Os participantes não precisam interpretar tudo literalmente.",
+    "Uma decisão pode ter uma intenção escondida.",
+    "Observar os adversários é tão importante quanto agir.",
+    "Demonstrar confiança demais pode levantar suspeitas.",
+    "O objetivo real não é óbvio para todos.",
+    "A estratégia depende da percepção alheia.",
+    "Um aparente erro pode fazer parte do plano.",
+    "Os outros jogadores podem tirar conclusões erradas.",
+    "A vitória depende de controlar a impressão que você causa."
+  ]
+},
+{
+  category:"Situação",
+  secret:"Uma reunião em que cada pessoa recebeu uma versão diferente da mesma instrução",
+  hints:[
+    "Todos participam do mesmo evento.",
+    "As pessoas acreditam ter entendido o que devem fazer.",
+    "As instruções não são iguais para todos.",
+    "O conflito pode surgir sem que alguém queira provocá-lo.",
+    "Comparar informações ajuda a revelar o problema.",
+    "Cada participante pode agir de boa-fé.",
+    "A comunicação é o centro da situação.",
+    "O mal-entendido só fica evidente quando conversam.",
+    "A informação foi distribuída de forma desigual.",
+    "A confusão começa porque não receberam a mesma orientação."
+  ]
+},
+{
+  category:"Acontecimento",
+  secret:"Um sinal de rádio desconhecido interrompe todas as transmissões por alguns segundos",
+  hints:[
+    "O acontecimento afeta diferentes receptores.",
+    "A interrupção dura pouco tempo.",
+    "A origem do sinal não é conhecida.",
+    "Especialistas tentam descobrir se foi algo natural ou artificial.",
+    "O padrão da interferência pode conter uma pista.",
+    "O fenômeno ocorre por meio de ondas.",
+    "A interrupção chama atenção por ser incomum.",
+    "A investigação depende de dados técnicos.",
+    "O sinal pode ter sido enviado intencionalmente.",
+    "Uma comunicação desconhecida interfere em outras comunicações."
+  ]
+},
+{
+  category:"Objeto",
+  secret:"Uma chave que abre uma porta que não aparece em nenhuma planta do edifício",
+  hints:[
+    "O objeto parece ter uma função específica.",
+    "Existe uma incompatibilidade entre o objeto e o lugar.",
+    "Os registros disponíveis não explicam sua existência.",
+    "Alguém precisa descobrir o que está faltando na história.",
+    "O objeto pode indicar uma área desconhecida.",
+    "O edifício guarda um segredo.",
+    "A ausência de registros torna a descoberta mais estranha.",
+    "O formato do objeto pode.",
+   "Uma entrada pode estar escondida ou esquecida.",
+    "O mistério liga uma chave a uma porta desconhecida."
+  ]
+}
+];
+
+
+// 160 perguntas curtas: formuladas para favorecer respostas de uma palavra.
+const QUESTION_BANK = [
+  "Qual é a característica mais marcante?", "Qual palavra combina com isso?", "Qual é a primeira associação?", "Qual sensação isso provoca?", "Qual é o maior destaque?",
+  "Qual cor combina melhor?", "Qual som vem à mente?", "Qual seria o principal uso?", "Qual é a maior qualidade?", "Qual é o maior defeito?",
+  "Qual seria o maior risco?", "Qual seria a maior vantagem?", "Qual ambiente combina?", "Qual época combina?", "Qual clima combina?",
+  "Qual emoção representa isso?", "Qual adjetivo descreve melhor?", "Qual é o detalhe essencial?", "Qual é a impressão inicial?", "Qual palavra evitaria?",
+  "Que animal lembra isso?", "Que cor você associa?", "Que textura imagina?", "Que cheiro combina?", "Que som seria típico?",
+  "Que tamanho imagina?", "Que forma combina?", "Que material vem à mente?", "Que sensação teria ao tocar?", "Que movimento combina?",
+  "Que elemento não pode faltar?", "Que objeto tem relação?", "Que lugar combina?", "Que pessoa se relaciona?", "Que profissão se aproxima?",
+  "Que estação do ano combina?", "Que horário combina?", "Que temperatura imagina?", "Que palavra resume tudo?", "Que detalhe chamaria atenção?",
+  "Qual seria o sabor?", "Qual ingrediente combina?", "Qual bebida lembra isso?", "Qual refeição combina?", "Qual tempero combina?",
+  "Qual fruta vem à mente?", "Qual doce combina?", "Qual textura teria?", "Qual cheiro seria marcante?", "Qual seria a cobertura?",
+  "Qual seria o acompanhamento?", "Qual utensílio seria útil?", "Qual seria a forma ideal?", "Qual seria a temperatura?", "Qual seria a ocasião?",
+  "Qual palavra abre o apetite?", "Qual sabor predominaria?", "Qual seria a cor principal?", "Qual seria a origem?", "Qual seria o ingrediente-chave?",
+  "Qual material parece mais provável?", "Qual ferramenta combina?", "Qual peça seria essencial?", "Qual seria o formato?", "Qual seria o peso aproximado?",
+  "Qual seria a função principal?", "Qual cômodo combina?", "Qual problema resolveria?", "Qual acessório combina?", "Qual seria a fonte de energia?",
+  "Qual seria o maior benefício?", "Qual seria o risco de uso?", "Qual detalhe seria frágil?", "Qual parte chamaria atenção?", "Qual seria o som ao usar?",
+  "Qual seria a cor mais comum?", "Qual seria o tamanho ideal?", "Qual seria a forma de guardar?", "Qual seria o material externo?", "Qual seria a palavra-chave?",
+  "Qual lugar combina mais?", "Qual paisagem vem à mente?", "Qual clima predominaria?", "Qual som seria ouvido?", "Qual elemento natural se destaca?",
+  "Qual seria o melhor horário?", "Qual seria a estação ideal?", "Qual sensação o lugar transmite?", "Qual seria o maior perigo?", "Qual seria o ponto central?",
+  "Qual seria a vista principal?", "Qual seria o cheiro do ambiente?", "Qual seria a cor dominante?", "Qual seria a distância?", "Qual seria o caminho?",
+  "Qual palavra descreve o ambiente?", "Qual fenômeno combina?", "Qual elemento estaria presente?", "Qual seria o obstáculo?", "Qual seria a surpresa?",
+  "Qual sentimento aparece primeiro?", "Qual atitude seria necessária?", "Qual seria o maior desafio?", "Qual seria a prioridade?", "Qual seria a consequência?",
+  "Qual seria a solução?", "Qual seria o principal conflito?", "Qual seria a motivação?", "Qual seria o objetivo?", "Qual seria o segredo?",
+  "Qual seria a pista principal?", "Qual detalhe parece suspeito?", "Qual seria a hipótese?", "Qual seria o sinal de alerta?", "Qual seria a evidência?",
+  "Qual seria a reação inicial?", "Qual seria a decisão mais difícil?", "Qual seria o maior erro?", "Qual seria a melhor estratégia?", "Qual seria a palavra decisiva?",
+  "Qual emoção dominaria a cena?", "Qual personagem se destacaria?", "Qual seria o cenário?", "Qual seria o gênero?", "Qual seria o tom da história?",
+  "Qual seria o símbolo central?", "Qual seria o poder principal?", "Qual seria a fraqueza?", "Qual seria o elemento fantástico?", "Qual seria o mistério?",
+  "Qual seria o perigo imediato?", "Qual seria a recompensa?", "Qual seria o antagonista?", "Qual seria o aliado?", "Qual seria a reviravolta?",
+  "Qual palavra define a estratégia?", "Qual seria a intenção escondida?", "Qual seria o maior blefe?", "Qual seria a suspeita?", "Qual seria a melhor defesa?",
+  "Qual seria o ponto fraco?", "Qual seria a vantagem secreta?", "Qual seria o sinal de confiança?", "Qual seria o indício de mentira?", "Qual seria a decisão final?",
+  "Qual seria o elemento mais estranho?", "Qual seria a explicação provável?", "Qual seria a causa?", "Qual seria o efeito?", "Qual seria a conexão?",
+  "Qual seria a origem do problema?", "Qual seria a peça que falta?", "Qual seria o detalhe ignorado?", "Qual seria o resultado inesperado?", "Qual seria a palavra que resume o caso?",
+  "Qual seria o maior sinal de perigo?", "Qual palavra despertaria desconfiança?", "Qual seria a pista mais óbvia?", "Qual seria a reação mais provável?", "Qual seria o detalhe decisivo?"
+];
+
+function drawQuestion() {
+  let available=QUESTION_BANK.map((_,index)=>index).filter(index=>!game.usedQuestions.includes(index));
+  if(!available.length) { game.usedQuestions=[]; available=QUESTION_BANK.map((_,index)=>index); }
+  const index=available[randomInt(available.length)];
+  game.usedQuestions.push(index);
+  game.currentQuestion=QUESTION_BANK[index];
+}
+
+const LEVELS = ["Normal","Difícil","Muito difícil","Mestre","Mentalista"];
+let game = null;
+let votes = {};
+let currentVoterIndex = 0;
+let roundNumber = 1;
+const QUESTION_TIMER_SECONDS = 180;
+let timerRemaining = QUESTION_TIMER_SECONDS;
+let timerRunning = false;
+let timerInterval = null;
+let timerRound = 0;
+
+function stopQuestionTimer() {
+  if(timerInterval!==null) clearInterval(timerInterval);
+  timerInterval=null;
+  timerRunning=false;
+}
+function resetQuestionTimer() {
+  stopQuestionTimer();
+  timerRemaining=QUESTION_TIMER_SECONDS;
+  timerRound=roundNumber;
+  updateQuestionTimerDisplay();
+}
+function startQuestionTimer() {
+  if(timerRunning || timerRemaining<=0) return;
+  timerRunning=true;
+  timerInterval=setInterval(()=>{
+    if(timerRemaining>0) timerRemaining--;
+    if(timerRemaining<=0) {
+      timerRemaining=0;
+      stopQuestionTimer();
+      playSound("lose");
+    }
+    updateQuestionTimerDisplay();
+  },1000);
+  updateQuestionTimerDisplay();
+}
+function updateQuestionTimerDisplay() {
+  const display=$("timerDisplay");
+  const status=$("timerStatus");
+  const toggle=$("timerToggle");
+  if(!display) return;
+  const minutes=Math.floor(timerRemaining/60).toString().padStart(2,"0");
+  const seconds=(timerRemaining%60).toString().padStart(2,"0");
+  display.textContent=`${minutes}:${seconds}`;
+  display.classList.toggle("time-up",timerRemaining===0);
+  if(status) status.textContent=timerRemaining===0?"⏰ Tempo esgotado!":timerRunning?"Cronômetro em andamento":"Cronômetro pausado";
+  if(toggle) toggle.textContent=timerRunning?"⏸️ PAUSAR":(timerRemaining===QUESTION_TIMER_SECONDS?"▶️ INICIAR":"▶️ CONTINUAR");
+}
+
+function maxImpostorsFor(count) {
+  if (count >= 3 && count <= 4) return 1;
+  if (count >= 5 && count <= 6) return 2;
+  if (count >= 7 && count <= 10) return 3;
+  return 0;
+}
+
+// Sorteio criptograficamente forte quando o navegador oferece Web Crypto.
+function randomInt(max) {
+  if (max <= 1) return 0;
+  if (globalThis.crypto && crypto.getRandomValues) {
+    const range = 0x100000000;
+    const limit = range - (range % max);
+    const buf = new Uint32Array(1);
+    let value;
+    do { crypto.getRandomValues(buf); value = buf[0]; } while (value >= limit);
+    return value % max;
+  }
+  return Math.floor(Math.random() * max);
+}
+
+function shuffle(array) {
+  const result = [...array];
+  for (let i=result.length-1; i>0; i--) {
+    const j=randomInt(i+1);
+    [result[i],result[j]]=[result[j],result[i]];
+  }
+  return result;
+}
+
+// Monta segredos novos a partir de muitas peças combináveis, em vez de depender
+// apenas de uma lista curta e repetitiva de exemplos prontos.
+const SECRET_PARTS = {
+  nouns:["um relógio", "uma fotografia", "um elevador", "um trem", "uma biblioteca", "um hospital", "uma ilha", "um museu", "um estádio", "uma estação espacial", "uma escola", "um hotel", "um farol", "um laboratório", "um navio", "um satélite", "um teatro", "um mercado", "um castelo", "uma cidade", "uma floresta", "um aplicativo", "um robô", "uma máquina", "um diário", "uma chave", "um mapa", "uma estátua", "um telefone", "um arquivo", "um quadro", "um túnel", "uma ponte", "um aeroporto", "um planeta", "um canal de televisão", "um servidor de internet", "uma caixa misteriosa", "um experimento", "uma competição", "uma reunião", "uma transmissão de rádio", "um sonho", "um jogo de tabuleiro", "um banco", "um restaurante", "um parque", "um condomínio", "um laboratório subterrâneo"],
+  places:["no centro da cidade", "em uma ilha remota", "dentro de um museu", "em uma estação abandonada", "no fundo do oceano", "em uma cidade futurista", "durante uma viagem", "em um prédio sem janelas", "no meio de uma floresta", "em uma base científica", "em um bairro inteiro", "em uma colônia espacial", "sob uma praça", "em um hotel lotado", "em um vilarejo isolado", "em um parque de diversões", "em um túnel subterrâneo", "em um navio em movimento", "em uma escola durante a noite", "em uma cidade que não aparece nos mapas"],
+  events:["desaparece sem deixar vestígios", "começa a funcionar ao contrário", "repete o mesmo minuto várias vezes", "envia uma mensagem impossível", "muda de lugar toda vez que alguém olha", "faz todos receberem a mesma ligação", "aparece em registros de décadas diferentes", "fica inacessível por exatamente onze minutos", "revela um segredo que ninguém conhecia", "passa a prever acontecimentos", "faz todas as luzes piscarem em sequência", "é encontrado duplicado em lugares diferentes", "para de aparecer em todas as fotografias", "começa a emitir um sinal desconhecido", "troca as informações de todas as pessoas", "fica visível apenas em reflexos", "provoca uma falha simultânea em vários sistemas", "é encontrado intacto depois de ter sido destruído", "recebe instruções assinadas por alguém que não existe", "faz com que testemunhas contem versões incompatíveis", "surge em uma transmissão ao vivo sem explicação", "abre acesso a um lugar que não consta nas plantas", "muda de forma sem que ninguém perceba como", "é anunciado antes de acontecer", "fica diferente a cada vez que é medido", "faz todos os relógios marcarem horários diferentes", "desaparece e deixa uma cópia perfeita", "começa a responder perguntas antes de serem feitas"],
+  concepts:["uma troca de identidades", "um plano secreto", "um erro de memória coletiva", "uma competição com regras ocultas", "uma descoberta acidental", "um experimento fora de controle", "um código que ninguém consegue decifrar", "uma coincidência impossível", "um desaparecimento inexplicável", "uma mensagem vinda do futuro", "um acordo que ninguém lembra de ter feito", "uma falha na realidade", "uma investigação com pistas contraditórias", "uma decisão que altera tudo", "um objeto que não deveria existir", "um segredo compartilhado por desconhecidos", "uma previsão que começa a se cumprir", "um acontecimento apagado dos registros", "uma simulação impossível de distinguir da realidade", "uma disputa em que as regras mudam sozinhas"],
+  modifiers:["durante um apagão", "sem qualquer aviso", "exatamente à meia-noite", "diante de centenas de testemunhas", "sem deixar registros digitais", "enquanto ninguém está olhando", "em todos os lugares ao mesmo tempo", "com todos os detalhes repetidos", "sem que exista uma causa conhecida", "poucos segundos antes de um anúncio", "e ninguém concorda sobre o motivo", "mas apenas uma pessoa percebe", "e os registros mostram outra versão", "deixando uma única pista impossível", "sem alterar nada ao redor", "sempre que alguém tenta investigar", "e depois volta ao normal", "mas somente em dias pares", "com a mesma mensagem em vários idiomas", "e ninguém consegue provar que aconteceu"]
+};
+
+function pick(list) { return list[randomInt(list.length)]; }
+const RECENT_SECRET_LIMIT = 500;
+const recentSecrets = [];
+
+// Palavras únicas para Normal, Difícil e Muito difícil.
+const WORDS = {
+  normal: [
+    ["Animais", "gato", "cachorro", "girafa", "pinguim", "tartaruga", "golfinho", "coruja", "raposa", "polvo", "camaleão", "morcego", "borboleta", "formiga", "jacaré", "baleia", "abelha", "esquilo", "canguru", "pavão"],
+    ["Comidas", "lasanha", "pipoca", "brigadeiro", "panqueca", "sushi", "coxinha", "tapioca", "sanduíche", "pudim", "abacaxi", "morango", "amendoim", "azeitona", "canjica"],
+    ["Objetos", "guarda-chuva", "tesoura", "bússola", "ampulheta", "binóculo", "travesseiro", "grampeador", "cadeado", "ventilador", "lanterna", "mochila", "espelho", "martelo", "controle", "telescópio"],
+    ["Lugares", "biblioteca", "aeroporto", "aquário", "castelo", "farol", "estádio", "museu", "labirinto", "observatório", "caverna", "mercado", "mosteiro", "planetário"],
+    ["Natureza", "tornado", "geleira", "cachoeira", "eclipse", "vulcão", "cometa", "arco-íris", "tsunami", "neblina", "avalanche", "miragem"],
+    ["Profissões", "astrônomo", "arqueólogo", "dublador", "cartógrafo", "bombeiro", "detetive", "maquinista", "escultor", "meteorologista", "ilusionista"],
+    ["Esportes e artes", "esgrima", "surfe", "xadrez", "capoeira", "balé", "cerâmica", "malabarismo", "patinação", "mergulho", "origami"]
+  ],
+  dificil: [
+    ["Animais", "ornitorrinco", "axolote", "pangolim", "narval", "quetzal", "ocapi", "saiga", "feneco", "társio", "caracal", "lêmure", "kiwi", "casuar", "peixe-lua"],
+    ["Ciência", "magnetismo", "fotossíntese", "gravidade", "isótopo", "neutrino", "tectônica", "bioluminescência", "criogenia", "entropia", "quasar", "pulsar", "antimatéria", "criptografia"],
+    ["Palavras", "paradoxo", "labirinto", "efêmero", "enigma", "nostalgia", "vertigem", "utopia", "silhueta", "eufemismo", "cataclismo", "presságio", "simetria", "ressonância"],
+    ["Objetos e lugares", "astrolábio", "caleidoscópio", "sismógrafo", "criptógrafo", "anfiteatro", "mausoléu", "criptas", "minarete", "aqueduto", "baluarte", "catacumba"],
+    ["História e cultura", "hieróglifo", "mitologia", "oráculo", "alquimia", "renascimento", "feudalismo", "fóssil", "pergaminho", "mosaico", "trovadorismo"]
+  ],
+  muito: [
+    ["Vocabulário raro", "idiossincrasia", "inefável", "inexorável", "ubíquo", "arcano", "anacrônico", "quimera", "aporia", "parcimônia", "prolegômeno", "filigrana", "escarpa", "fulguração", "circunspecção", "esdrúxulo", "inócuo", "obnubilado", "lúgubre", "sibilino"],
+    ["Ciência e ideias", "singularidade", "supercondutividade", "isomorfismo", "ressonância", "criptologia", "epigenética", "nanotecnologia", "probabilidade", "metamorfose", "neuroplasticidade", "cosmologia", "homeostase", "aleatoriedade", "relatividade"],
+    ["Conceitos", "determinismo", "paralaxe", "sinestesia", "ambiguidade", "recursividade", "paradigma", "dissonância", "transitoriedade", "incongruência", "contingência", "indeterminação", "parcimônia", "anacronismo"],
+    ["Termos especializados", "espeleologia", "orogenia", "criptobiose", "xerófita", "fulgurito", "zeugma", "anagnórise", "palimpsesto", "apofenia", "pareidolia", "isobárico", "abiogênese", "eutrofização"]
+  ]
+};
+
+const CASE_PARTS = {
+  people:["uma equipe de peritos", "uma turma inteira", "um grupo de desconhecidos", "uma pesquisadora", "um prefeito", "uma família", "uma tripulação", "um guarda noturno", "uma organização secreta", "três testemunhas", "um entregador", "uma equipe de filmagem", "um conselho científico", "um viajante", "um investigador aposentado", "uma cidade inteira"],
+  places:["num hotel isolado", "numa estação de metrô", "numa cidade costeira", "num laboratório subterrâneo", "num museu fechado", "numa ilha sem sinal", "num trem em movimento", "numa escola vazia", "numa base polar", "num arquivo municipal", "num navio cargueiro", "num prédio inteligente", "num vilarejo remoto", "num observatório", "num parque de diversões", "numa colônia espacial", "num hospital antigo", "numa transmissão ao vivo", "numa cidade futurista", "num túnel recém-descoberto"],
+  objects:["um relógio", "uma fotografia", "um diário", "uma chave", "um quadro", "um telefone", "um mapa", "uma estátua", "um arquivo digital", "uma caixa lacrada", "um elevador", "um satélite", "uma gravação", "um protótipo", "uma mala", "um bilhete", "um robô", "uma máscara", "um cartão de acesso", "um instrumento científico", "um livro raro", "uma câmera", "um sinal de rádio", "um documento", "uma máquina"],
+  events:["desaparece sem deixar vestígios", "aparece em dois lugares ao mesmo tempo", "começa a prever acontecimentos", "registra uma pessoa que não existe", "repete os mesmos treze minutos", "troca as memórias de duas testemunhas", "envia uma mensagem datada do futuro", "é encontrado intacto após ser destruído", "faz todos os relógios divergirem", "revela uma gravação que ninguém fez", "muda sempre que alguém o descreve", "abre uma passagem desconhecida", "surge em documentos de cem anos atrás", "para de aparecer nas fotografias", "emite um sinal impossível de localizar", "provoca versões incompatíveis do mesmo fato", "é anunciado antes de acontecer", "fica inacessível exatamente por onze minutos", "apresenta uma assinatura impossível", "faz uma cidade inteira esquecer a mesma coisa", "é substituído por uma cópia perfeita", "mostra imagens de um lugar inexistente", "passa a responder perguntas antes de serem feitas", "some dos registros oficiais", "é descoberto no local errado"],
+  twists:["mas cada testemunha conta uma versão diferente", "e ninguém consegue provar que aconteceu", "embora todos os registros indiquem outra coisa", "sem que haja qualquer sinal de invasão", "e a única pista contradiz a explicação mais óbvia", "mas uma pessoa parece já saber o final", "enquanto uma contagem regressiva continua", "e o motivo permanece desconhecido", "apesar de todos estarem no mesmo lugar", "mas só acontece quando alguém tenta investigar", "e a última evidência muda o sentido do caso", "sem deixar marcas físicas", "embora o sistema nunca tenha sido ligado", "e duas hipóteses parecem igualmente possíveis", "mas a pessoa suspeita tem um álibi perfeito", "e o caso foi oficialmente encerrado antes de começar", "sem que ninguém se lembre do momento inicial", "mas todos os envolvidos negam ter se conhecido", "e a solução depende de um detalhe ignorado", "embora o acontecimento tenha sido previsto num documento antigo"],
+  categories:["Mistério", "Investigação", "Acontecimento", "Fenômeno", "Caso inexplicável", "Conflito", "Enigma", "Operação secreta", "Experimento", "Incidente", "Desaparecimento", "Anomalia", "Descoberta", "Fraude", "Paradoxo"]
+};
+
+function rememberSecret(secret) {
+  const key=secret.toLocaleLowerCase("pt-BR");
+  if (recentSecrets.includes(key)) return false;
+  recentSecrets.push(key);
+  if (recentSecrets.length>RECENT_SECRET_LIMIT) recentSecrets.shift();
+  return true;
+}
+
+function buildWordContent(level) {
+  const key=level==="Normal"?"normal":level==="Difícil"?"dificil":"muito";
+  const groups=WORDS[key];
+  let secret="", category="";
+  for(let attempt=0;attempt<100;attempt++) {
+    const group=pick(groups);
+    category=group[0];
+    secret=pick(group.slice(1));
+    if(rememberSecret(`${key}:${secret}`)) break;
+  }
+  // Palavras inventadas, mas pronunciáveis, ampliam o repertório da dificuldade máxima.
+  if(key==="muito" && randomInt(4)===0) {
+    const rootsA=["crono","neuro","astro","cripto","lito","somno","piro","aero","hidro","xeno","meta","equi","nexo","voro","eco","lumi","oni","proto","nano","retro"];
+    const rootsB=["vórtice","gênese","glifo","nômico","lúmen","fagia","mancia","fobia","dromo","plasma","cinese","ciclo","morfose","tropia","fônico","sfera","grafia","lítico","doxía","nexo"];
+    secret=pick(rootsA)+pick(rootsB);
+    category="Conceito inventado";
+    rememberSecret(`inventado:${secret}`);
+  }
+  const easyClues=["É algo que pode ser nomeado.","A palavra tem um significado específico.","Pense no contexto em que isso aparece.","Pode ser reconhecido por suas características."];
+  return {category,secret,clue:pick(easyClues),hints:[]};
+}
+
+function buildCaseContent(level) {
+  const templates=[
+    () => `${pick(CASE_PARTS.people)} encontra ${pick(CASE_PARTS.objects)} ${pick(CASE_PARTS.events)} ${pick(CASE_PARTS.places)}, ${pick(CASE_PARTS.twists)}.`,
+    () => `O caso de ${pick(CASE_PARTS.objects)} que ${pick(CASE_PARTS.events)} ${pick(CASE_PARTS.places)}, ${pick(CASE_PARTS.twists)}.`,
+    () => `${pick(CASE_PARTS.people)} precisa investigar por que ${pick(CASE_PARTS.objects)} ${pick(CASE_PARTS.events)} ${pick(CASE_PARTS.places)}, ${pick(CASE_PARTS.twists)}.`,
+    () => `Uma operação chamada "${pick(["Espelho Cego","Horizonte Zero","Projeto Oráculo","Relógio de Vidro","Arquivo Fantasma","Protocolo Eclipse","Labirinto Azul","Sinal de Ninguém","Última Testemunha","Quarto Silencioso","Operação Prisma","Código Nébula","Ponto Cego","Vigília","Janela 13","Eco Invertido"])}" começa quando ${pick(CASE_PARTS.objects)} ${pick(CASE_PARTS.events)} ${pick(CASE_PARTS.places)}, ${pick(CASE_PARTS.twists)}.`
+  ];
+  let secret="";
+  for(let attempt=0;attempt<100;attempt++) {
+    secret=pick(templates)();
+    if(rememberSecret(`caso:${secret}`)) break;
+  }
+  const category=pick(CASE_PARTS.categories);
+  // Pistas temáticas e individuais: cada jogador recebe uma diferente.
+  const clues=[
+    `O caso envolve ${pick(["uma falha nos registros","uma testemunha pouco confiável","um objeto fora do lugar","um padrão que se repete","uma informação contraditória","um intervalo de tempo suspeito","uma identidade incerta","uma regra que ninguém conhecia"])}`,
+    `Preste atenção em ${pick(["quem teve acesso ao local","a ordem dos acontecimentos","o detalhe que todos ignoraram","o que não aparece nas gravações","a diferença entre relato e evidência","o momento em que tudo mudou","a origem da primeira informação","quem se beneficia da confusão"])}`,
+    `Uma hipótese importante é que ${pick(["a explicação mais óbvia esteja errada","duas versões contenham parte da verdade","o problema tenha começado antes de ser percebido","alguém conheça um detalhe impossível","o registro tenha sido alterado","o acaso não explique todos os fatos","o motivo seja diferente da aparência","a pista principal seja uma ausência"])}`,
+    `O cenário principal é ${pick(CASE_PARTS.places)}.`,
+    `Um elemento importante do caso é ${pick(CASE_PARTS.objects)}.`,
+    `A investigação depende de esclarecer ${pick(["a sequência exata dos fatos","a origem de uma mensagem","uma diferença entre cópias","um álibi aparentemente perfeito","uma lembrança compartilhada","um acesso não autorizado","uma previsão registrada antes do evento","uma contradição entre testemunhas"])}`,
+    `O acontecimento central parece ${pick(["impossível, mas deixou evidências","comum até ser analisado de perto","planejado, embora não haja autor conhecido","isolado, mas afeta várias pessoas","resolvido, apesar de uma pergunta sem resposta","aleatório, mas segue um padrão"])}`,
+    `A pista mais útil pode estar em ${pick(["um horário","uma palavra repetida","uma ausência","um objeto comum","uma mudança pequena","uma testemunha secundária","um registro antigo","uma sequência numérica"])}`,
+    `Há uma ligação inesperada entre ${pick(CASE_PARTS.objects)} e ${pick(CASE_PARTS.places)}.`,
+    `Não confunda ${pick(["o motivo com a consequência","a primeira versão com a verdadeira","uma coincidência com uma prova","o suspeito com o responsável","o que foi visto com o que realmente ocorreu","a ausência de prova com uma prova de ausência"])}`,
+    `A categoria geral deste caso é ${category.toLowerCase()}, mas isso não revela sua solução.`
+  ];
+  const shuffled=shuffle(clues);
+  return {category,secret,clue:shuffled[0],hints:shuffled};
+}
+
+function getContentForLevel(level) {
+  if(level==="Normal" || level==="Difícil" || level==="Muito difícil") return buildWordContent(level);
+  return buildCaseContent(level);
+}
+
+function renderSetup() {
+  $("gameContent").innerHTML = `
+    <section class="panel">
+      <span class="badge">✦ CONFIGURAR PARTIDA</span>
+      <h2>Preparem-se para jogar</h2>
+      <p class="muted">Digite um nome por linha. Joguem de 3 a 10 pessoas.</p>
+      <label for="names">Nomes dos jogadores</label>
+      <textarea id="names" placeholder="Ana&#10;Bruno&#10;Carlos"></textarea>
+      <p id="playerCount" class="muted">0 jogadores</p>
+      <div class="grid">
+        <div>
+          <label for="impostorCount">Número de impostores</label>
+          <select id="impostorCount"></select>
+          <p id="impostorHelp" class="muted">Adicione pelo menos 3 jogadores.</p>
+        </div>
+        <div>
+          <label for="level">Dificuldade</label>
+          <select id="level">${LEVELS.map(l=>`<option>${l}</option>`).join("")}</select>
+          <p id="levelHelp" class="muted">Escolha o desafio da partida.</p>
+        </div>
+      </div>
+      <button class="primary" id="startGame">🎮 INICIAR PARTIDA</button>
+    </section>
+    <section class="panel">
+      <h3>🎯 Como jogar</h3>
+      <p class="muted">Os investigadores tentam descobrir o segredo e identificar os impostores. Os impostores tentam entender as pistas e não ser descobertos.</p>
+      <p class="muted">Cada pessoa vê sua carta em particular. Passe o celular somente quando a carta estiver escondida.</p>
+    </section>`;
+
+  $("names").addEventListener("input",updateSetup);
+  $("startGame").addEventListener("click",startGame);
+  $("level").addEventListener("change",updateLevelHelp);
+  updateSetup();
+  updateLevelHelp();
+}
+
+function updateLevelHelp() {
+  const descriptions = {
+    "Normal":"Dificuldade base: conteúdos e pistas mais diretos.",
+    "Difícil":"50% mais difícil: exige mais atenção às pistas.",
+    "Muito difícil":"100% mais difícil: pistas menos óbvias e mais interpretação.",
+    "Mestre":"150% mais difícil: conteúdos variados, situações e mistérios.",
+    "Mentalista":"200% mais difícil: cada jogador recebe uma pista individual."
+  };
+  $("levelHelp").textContent=descriptions[$("level").value];
+}
+
+function updateSetup() {
+  const names=$("names").value.split("\n").map(n=>n.trim()).filter(Boolean);
+  $("playerCount").textContent=`${names.length} ${names.length===1?"jogador":"jogadores"}`;
+
+  const max=maxImpostorsFor(names.length);
+  const select=$("impostorCount");
+  const previous=Number(select.value)||1;
+  select.innerHTML="";
+
+  for(let i=1;i<=Math.max(1,max);i++) {
+    const option=document.createElement("option");
+    option.value=String(i);
+    option.textContent=`${i} ${i===1?"impostor":"impostores"}`;
+    select.appendChild(option);
+  }
+
+  select.value=String(Math.min(previous,Math.max(1,max)));
+  $("impostorHelp").textContent=names.length<3
+    ?"Adicione pelo menos 3 jogadores."
+    :names.length>10
+      ?"O limite é de 10 jogadores."
+      :`Com ${names.length} jogadores, o máximo é ${max} ${max===1?"impostor":"impostores"}.`;
+}
+
+function startGame() {
+  const names=$("names").value.split("\n").map(n=>n.trim()).filter(Boolean);
+
+  if(names.length<3||names.length>10) {
+    alert("A partida precisa de 3 a 10 jogadores."); return;
+  }
+  if(new Set(names.map(n=>n.toLocaleLowerCase("pt-BR"))).size!==names.length) {
+    alert("Existem nomes repetidos. Corrija antes de iniciar."); return;
+  }
+
+  const impostorCount=Number($("impostorCount").value);
+  const max=maxImpostorsFor(names.length);
+
+  if(!Number.isInteger(impostorCount)||impostorCount<1||impostorCount>max||impostorCount>=names.length) {
+    alert(`Com ${names.length} jogadores, o máximo permitido é ${max} ${max===1?"impostor":"impostores"}.`);
+    return;
+  }
+
+  const selected=getContentForLevel($("level").value);
+  const impostorIndices=new Set(
+    shuffle(names.map((_,index)=>index)).slice(0,impostorCount)
+  );
+  const mentalista=$("level").value==="Mentalista";
+  const caseMode=["Mestre","Mentalista"].includes($("level").value);
+  const playerClues=shuffle([...selected.hints]);
+
+  game={
+    secret:selected,
+    level:$("level").value,
+    impostorCount,
+    players:names.map((name,index)=>({
+      name,index,
+      role:impostorIndices.has(index)?"impostor":"investigador",
+      alive:true,
+      clue:playerClues[index] || selected.clue
+    })),
+    dealIndex:0,
+    phase:"deal",
+    tieCandidates:null,
+    lastResult:null,
+    eliminatedInvestigators:0,
+    usedQuestions:[],
+    currentQuestion:null
+  };
+
+  stopQuestionTimer();
+  votes={};currentVoterIndex=0;roundNumber=1;timerRemaining=QUESTION_TIMER_SECONDS;timerRound=0;
+  if (soundEnabled) initAudio();
+  render();
+}
+
+function cancelButton() {
+  return `<div class="top-actions"><button class="danger small" id="cancelGame">✕ Cancelar partida</button></div>`;
+}
+
+function attachCancel() {
+  const button=$("cancelGame");
+  if(button) button.addEventListener("click",cancelGame);
+}
+
+function cancelGame() {
+  if(!confirm("Tem certeza de que deseja cancelar? Todo o progresso desta partida será perdido.")) return;
+  stopQuestionTimer();
+  game=null;votes={};currentVoterIndex=0;roundNumber=1;timerRemaining=QUESTION_TIMER_SECONDS;timerRound=0;
+  renderSetup();
+}
+
+function render() {
+  if(!game) return renderSetup();
+  if(game.phase==="deal") renderDeal();
+  else if(game.phase==="questions") renderQuestions();
+  else if(game.phase==="discussion") renderDiscussion();
+  else if(game.phase==="voting") renderVoting();
+  else if(game.phase==="result") renderResult();
+  else if(game.phase==="tie") renderTie();
+  else if(game.phase==="end") renderEnd();
+}
+
+function renderDeal() {
+  const active=game.players.filter(p=>p.alive);
+  if(game.dealIndex>=active.length) {
+    game.phase="questions";
+    render();
+    return;
+  }
+
+  const player=active[game.dealIndex];
+  const mentalista=game.level==="Mentalista";
+  const caseMode=game.level==="Mestre" || mentalista;
+  const impostor=player.role==="impostor";
+  let details="";
+
+  if(caseMode) {
+    details=impostor
+      ?`<p class="muted">Sua função é <strong>IMPOSTOR</strong>. Você não recebe o caso, apenas sua pista.</p><div class="notice">Sua pista individual:<br><strong>${escapeHTML(player.clue)}</strong></div>`
+      :`<p class="muted">Sua função é <strong>INVESTIGADOR</strong>.</p><div class="notice">${mentalista?"Caso secreto":"Caso"}:<br><strong>${escapeHTML(game.secret.secret)}</strong></div><div class="notice">${mentalista?"Sua pista individual":"Sua dica"}:<br><strong>${escapeHTML(player.clue)}</strong></div>`;
+  } else {
+    details=impostor
+      ?`<p class="muted">Sua função é <strong>IMPOSTOR</strong>. Você vê apenas a categoria.</p><div class="notice">Categoria: <strong>${escapeHTML(game.secret.category)}</strong></div>`
+      :`<p class="muted">Sua função é <strong>INVESTIGADOR</strong>.</p><div class="notice">Palavra secreta: <strong>${escapeHTML(game.secret.secret)}</strong><br>Categoria: <strong>${escapeHTML(game.secret.category)}</strong></div>`;
+  }
+
+  $("gameContent").innerHTML=`
+    ${cancelButton()}
+    <section class="panel">
+      <span class="badge">🔐 DISTRIBUIÇÃO DE CARTAS</span>
+      <h2>📱 Entregue o celular a ${escapeHTML(player.name)}</h2>
+      <p class="muted">Somente essa pessoa deve olhar para a tela. Depois de ler, esconda a carta e passe o celular adiante.</p>
+      <div class="notice">Jogador ${game.dealIndex+1} de ${active.length}</div>
+      <button class="primary" id="showCard">MOSTRAR MINHA CARTA</button>
+      <div id="privateCard" class="card-secret hidden">
+        <div class="badge">SUA CARTA PRIVADA</div>
+        <div class="secret">${impostor?"🕶️ IMPOSTOR":"🔎 INVESTIGADOR"}</div>
+        ${details}
+        <button class="success" id="hideCard">ENTENDI — ESCONDER CARTA</button>
+      </div>
+    </section>
+    <p class="footer-note">🔒 Uma carta escondida não pode ser aberta novamente.</p>`;
+
+  attachCancel();
+
+  $("showCard").addEventListener("click",()=>{
+    playSound("card");
+    $("showCard").classList.add("hidden");
+    $("privateCard").classList.remove("hidden");
+  });
+
+  $("hideCard").addEventListener("click",()=>{
+    game.dealIndex++;
+    render();
+  });
+}
+</script>
+    
+    <script>
+function renderQuestions() {
+  if(!game.currentQuestion) drawQuestion();
+  $("gameContent").innerHTML=`
+    ${cancelButton()}
+    <section class="panel">
+      <span class="badge">🧩 FASE 1 · PERGUNTAS · RODADA ${roundNumber}</span>
+      <h2>Hora das perguntas</h2>
+      <p class="muted">Façam perguntas e tentem descobrir quem está blefando. Não revelem suas cartas.</p>
+      <div class="question-card">
+        <div class="question-label">PERGUNTA DA RODADA</div>
+        <div class="question-text">${escapeHTML(game.currentQuestion)}</div>
+        <p class="question-tip">Tentem responder com apenas uma palavra.</p>
+        <button class="secondary small" id="newQuestion" style="margin-top:13px">🎲 Sortear outra pergunta</button>
+      </div>
+      <h3>Jogadores ativos</h3>
+      ${game.players.filter(p=>p.alive).map(p=>`<div class="player-row"><span>${escapeHTML(p.name)}</span><span class="pill">Ativo</span></div>`).join("")}
+      <button class="primary" id="goDiscussion">⏱️ IR PARA A FASE 2 · DISCUSSÃO</button>
+    </section>`;
+  attachCancel();
+  $("newQuestion").addEventListener("click",()=>{ drawQuestion(); playSound("card"); renderQuestions(); });
+  $("goDiscussion").addEventListener("click",()=>{
+    if(timerRound!==roundNumber) resetQuestionTimer();
+    game.phase="discussion"; render();
+  });
+}
+
+function renderDiscussion() {
+  $("gameContent").innerHTML=`
+    ${cancelButton()}
+    <section class="panel">
+      <span class="badge">⏱️ FASE 2 · DISCUSSÃO · RODADA ${roundNumber}</span>
+      <h2>Discutam suas suspeitas</h2>
+      <p class="muted">Conversem entre si, comparem as respostas e decidam quem parece ser o impostor.</p>
+      <div class="timer-card">
+        <div class="question-label">⏱️ TEMPO DE DISCUSSÃO</div>
+        <div class="timer-display" id="timerDisplay">03:00</div>
+        <p class="timer-status" id="timerStatus">Cronômetro pausado</p>
+        <div class="timer-controls">
+          <button class="secondary small" id="timerToggle">▶️ INICIAR</button>
+          <button class="secondary small" id="timerReset">↺ ZERAR</button>
+        </div>
+      </div>
+      ${game.tieCandidates ? `<div class="notice">Empate anterior: na próxima votação, só poderão receber votos: ${game.tieCandidates.map(i=>escapeHTML(game.players.find(p=>p.index===i)?.name||"Jogador")).join(", ")}.</div>` : ""}
+      <button class="primary" id="goVoting">🗳️ IR PARA A FASE 3 · VOTAÇÃO</button>
+    </section>`;
+  attachCancel();
+  if(timerRound!==roundNumber) resetQuestionTimer();
+  updateQuestionTimerDisplay();
+  $("timerToggle").addEventListener("click",()=>{ if(timerRunning) stopQuestionTimer(); else startQuestionTimer(); updateQuestionTimerDisplay(); });
+  $("timerReset").addEventListener("click",()=>resetQuestionTimer());
+  $("goVoting").addEventListener("click",()=>{ stopQuestionTimer(); votes={}; currentVoterIndex=0; game.phase="voting"; render(); });
+}
+
+function eligibleCandidates(voter) {
+  let candidates=game.players.filter(p=>p.alive&&p.index!==voter.index);
+  if(game.tieCandidates) {
+    candidates=candidates.filter(p=>game.tieCandidates.includes(p.index));
+  }
+  return candidates;
+}
+
+function renderVoting() {
+  const active=game.players.filter(p=>p.alive);
+
+  while(currentVoterIndex<active.length&&votes[active[currentVoterIndex].index]!==undefined) {
+    currentVoterIndex++;
+  }
+
+  if(currentVoterIndex>=active.length) {
+    calculateVotes();return;
+  }
+
+  const voter=active[currentVoterIndex];
+  const candidates=eligibleCandidates(voter);
+
+  $("gameContent").innerHTML=`
+    ${cancelButton()}
+    <section class="panel">
+      <span class="badge">🗳️ FASE 3 · VOTAÇÃO · RODADA ${roundNumber}</span>
+      <h2>Voto de ${escapeHTML(voter.name)}</h2>
+      <p class="muted">Entregue o celular a essa pessoa. Escolha em quem ela vota e confirme.</p>
+      <div class="notice">Votos registrados: ${Object.keys(votes).length} de ${active.length}</div>
+      <div>
+        ${candidates.length?candidates.map(p=>`
+          <label class="vote-row">
+            <span>${escapeHTML(p.name)}</span>
+            <input type="radio" name="target" value="${p.index}">
+          </label>`).join(""):`<p class="muted">Não há candidatos válidos para este voto.</p>`}
+      </div>
+      <button class="primary" id="confirmVote" ${candidates.length?"":"disabled"}>CONFIRMAR VOTO</button>
+      <button class="secondary" id="backQuestions" style="width:100%;margin-top:10px">← VOLTAR ÀS PERGUNTAS</button>
+      <h3 style="margin-top:22px">Votos registrados</h3>
+      <div>
+        ${active.filter(p=>votes[p.index]!==undefined).map(p=>`
+          <div class="player-row">
+            <span>${escapeHTML(p.name)}</span>
+            <span class="pill">Votou em ${escapeHTML(game.players.find(t=>t.index===votes[p.index])?.name||"—")}</span>
+          </div>`).join("")||`<p class="muted">Nenhum voto registrado.</p>`}
+      </div>
+    </section>`;
+
+  attachCancel();
+
+  $("backQuestions").addEventListener("click",()=>{
+    if(!confirm("Voltar às perguntas apagará todos os votos desta rodada. Os papéis, o segredo e as eliminações anteriores serão mantidos. Continuar?")) return;
+    currentVoterIndex=0;
+    game.phase="questions";
+    render();
+  });
+
+  $("confirmVote").addEventListener("click",()=>{
+    const selected=document.querySelector('input[name="target"]:checked');
+    if(!selected) {
+      alert("Selecione em quem deseja votar.");return;
+    }
+
+    const targetIndex=Number(selected.value);
+    const target=game.players.find(p=>p.index===targetIndex);
+
+    if(!target||!target.alive||target.index===voter.index) {
+      alert("Voto inválido. Escolha um jogador ativo diferente de você.");return;
+    }
+    if(game.tieCandidates&&!game.tieCandidates.includes(target.index)) {
+      alert("Você só pode votar nos jogadores empatados.");return;
+    }
+
+    votes[voter.index]=targetIndex;
+    playSound("vote");
+    currentVoterIndex++;
+    render();
+  });
+}
+
+function calculateVotes() {
+  const tally={};
+  Object.values(votes).forEach(target=>{
+    tally[target]=(tally[target]||0)+1;
+  });
+
+  const entries=Object.entries(tally);
+
+  if(!entries.length) {
+    game.lastResult={type:"none",counts:tally};
+    game.phase="result";
+    render();
+    return;
+  }
+
+  const maxVotes=Math.max(...entries.map(([,count])=>count));
+  const tied=entries.filter(([,count])=>count===maxVotes).map(([index])=>Number(index));
+
+  if(tied.length>1) {
+    game.tieCandidates=tied;
+    game.lastResult={type:"tie",counts:tally,candidates:tied};
+    game.phase="tie";
+    render();
+    return;
+  }
+
+  const eliminatedIndex=tied[0];
+  const eliminated=game.players.find(p=>p.index===eliminatedIndex);
+
+  if(!eliminated||!eliminated.alive) {
+    game.lastResult={type:"none",counts:tally};
+    game.phase="result";
+    render();
+    return;
+  }
+
+  eliminated.alive=false;
+
+  if(eliminated.role==="investigador") {
+    game.eliminatedInvestigators++;
+  }
+
+  game.tieCandidates=null;
+  game.lastResult={
+    type:"elimination",
+    counts:tally,
+    eliminatedIndex,
+    eliminatedName:eliminated.name,
+    eliminatedRole:eliminated.role
+  };
+
+  game.gameOver=checkWinner();
+  game.phase="result";
+  render();
+}
+
+function checkWinner() {
+  const impostorsAlive=game.players.filter(p=>p.alive&&p.role==="impostor").length;
+
+  return impostorsAlive===0 ||
+    game.eliminatedInvestigators>=game.impostorCount;
+}
+
+function renderResult() {
+  const result=game.lastResult;
+  const eliminated=game.players.find(p=>p.index===result.eliminatedIndex);
+
+  $("gameContent").innerHTML=`
+    ${cancelButton()}
+    <section class="panel">
+      <span class="badge">📣 RESULTADO DA VOTAÇÃO</span>
+      <h2>${result.type==="none"?"Nenhum voto válido":escapeHTML(result.eliminatedName)+" foi eliminado"}</h2>
+      <p class="muted">${eliminated
+        ?"Revele o papel para todos depois de concluírem a votação."
+        :"Nenhum jogador foi eliminado. A partida pode continuar."}</p>
+      <div id="roleReveal" class="card-secret hidden">
+        <div class="reveal-intro" id="revealIntro">A VERDADE ESTÁ PRESTES A APARECER...</div>
+        <div class="secret reveal-role-text">${eliminated?.role==="impostor"?"🕶️ ERA IMPOSTOR":"🔎 ERA INVESTIGADOR"}</div>
+        <p class="reveal-role-text">${escapeHTML(result.eliminatedName||"")} ${eliminated?.role==="impostor"?"era um impostor!":"era um investigador."}</p>
+      </div>
+      <button class="primary" id="revealRole" ${eliminated?"":"disabled"}>🎬 INICIAR REVELAÇÃO</button>
+      <button class="secondary" id="continueGame" ${eliminated?"disabled":""} style="width:100%;margin-top:10px">CONTINUAR PARTIDA</button>
+    </section>
+    <section class="panel">
+      <h3>Contagem dos votos</h3>
+      ${Object.entries(result.counts).map(([index,count])=>`
+        <div class="player-row">
+          <span>${escapeHTML(game.players.find(p=>p.index===Number(index))?.name||"Jogador")}</span>
+          <span class="pill">${count} ${count===1?"voto":"votos"}</span>
+        </div>`).join("")||`<p class="muted">Nenhum voto foi registrado.</p>`}
+    </section>`;
+
+  attachCancel();
+
+  if(eliminated) {
+    $("revealRole").addEventListener("click",()=>{
+      const reveal=$("roleReveal");
+      const revealButton=$("revealRole");
+      reveal.classList.remove("hidden");
+      revealButton.disabled=true;
+      revealButton.textContent="⏳ REVELANDO...";
+      playSound("suspense");
+      setTimeout(()=>{
+        $("revealIntro").textContent="O PAPEL ERA...";
+        reveal.classList.add("revealed");
+        playSound("reveal");
+        revealButton.textContent="✓ PAPEL REVELADO";
+        $("continueGame").disabled=false;
+      },1700);
+    });
+  }
+
+  $("continueGame").addEventListener("click",()=>{
+    if(game.gameOver) {
+      game.phase="end";
+      render();
+      return;
+    }
+    roundNumber++;
+    game.phase="questions";
+    game.currentQuestion=null;
+    resetQuestionTimer();
+    votes={};
+    currentVoterIndex=0;
+    render();
+  });
+}
+
+function renderTie() {
+  const names=game.lastResult.candidates.map(index=>
+    game.players.find(p=>p.index===index)?.name||"Jogador"
+  );
+
+  $("gameContent").innerHTML=`
+    ${cancelButton()}
+    <section class="panel">
+      <span class="badge">🤝 EMPATE</span>
+      <h2>A votação empatou!</h2>
+      <p class="muted">Ninguém será eliminado nesta rodada. Conversem novamente e votem apenas nos jogadores empatados.</p>
+      <div class="notice">${names.map(escapeHTML).join(", ")}</div>
+      <button class="primary" id="newDiscussion">NOVA RODADA DE PERGUNTAS</button>
+      <button class="secondary" id="newVote" style="width:100%;margin-top:10px">VOTAR NOVAMENTE AGORA</button>
+    </section>`;
+
+  attachCancel();
+
+  $("newDiscussion").addEventListener("click",()=>{
+    roundNumber++;
+    resetQuestionTimer();
+    game.phase="questions";
+    game.currentQuestion=null;
+    votes={};
+    currentVoterIndex=0;
+    render();
+  });
+
+  $("newVote").addEventListener("click",()=>{
+    stopQuestionTimer();
+    roundNumber++;
+    votes={};
+    currentVoterIndex=0;
+    game.phase="voting";
+    render();
+  });
+}
+
+function renderEnd() {
+  const impostors=game.players.filter(p=>p.role==="impostor");
+  const impostorsAlive=impostors.filter(p=>p.alive).length;
+  const investigatorsWon=impostorsAlive===0;
+
+  $("gameContent").innerHTML=`
+    <section class="panel" style="text-align:center">
+      <div style="font-size:55px">${investigatorsWon?"🏆":"🕶️"}</div>
+      <span class="badge">FIM DE JOGO</span>
+      <h2>${investigatorsWon?"Os investigadores venceram!":"Os impostores venceram!"}</h2>
+      <p class="muted">${investigatorsWon
+        ?"Todos os impostores foram eliminados."
+        :"O número de investigadores eliminados chegou ao número de impostores escolhidos no início."}</p>
+      <div class="notice">
+        <strong>Conteúdo secreto</strong><br>${escapeHTML(game.secret.secret)}<br><br>
+        ${game.level!=="Mentalista"
+          ?`<strong>Categoria</strong><br>${escapeHTML(game.secret.category)}<br><br>`
+          :""}
+        <strong>Impostores</strong><br>${impostors.map(p=>escapeHTML(p.name)).join(", ")}
+      </div>
+      <h3>Todos os papéis</h3>
+      ${game.players.map(p=>`
+        <div class="player-row">
+          <span>${escapeHTML(p.name)}${p.alive?"":" (eliminado)"}</span>
+          <span class="pill">${p.role==="impostor"?"Impostor":"Investigador"}</span>
+        </div>`).join("")}
+      <button class="primary" id="playAgain">🔄 NOVA PARTIDA</button>
+      <button class="danger" id="cancelGame" style="width:100%;margin-top:10px">✕ ENCERRAR E VOLTAR AO INÍCIO</button>
+    </section>`;
+
+  $("playAgain").addEventListener("click",()=>{
+    stopQuestionTimer();
+    timerRemaining=QUESTION_TIMER_SECONDS;timerRound=0;
+    game=null;
+    votes={};
+    currentVoterIndex=0;
+    roundNumber=1;
+    renderSetup();
+  });
+
+  $("cancelGame").addEventListener("click",cancelGame);
+}
+
+renderSetup();
+</script>
+</body>
+</html>
