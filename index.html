@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quem é o Impostor? — Correção de votação</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#080b16;color:#f5f7ff;display:grid;place-items:center;min-height:100vh;padding:24px;box-sizing:border-box}
+main{max-width:620px;background:#11182a;border:1px solid #34415f;border-radius:18px;padding:24px;line-height:1.6}
+</style>
+</head>
+<body>
+<main>
+<h2>Carregando Quem é o Impostor…</h2>
+<p>Esta versão aplica a correção para que, após um empate, todos os jogadores ainda ativos possam receber votos.</p>
+<p id="status">Carregando o jogo original e aplicando a correção…</p>
+</main>
+<script>
+(async function () {
+  const status = document.getElementById('status');
+  try {
+    // Carrega a versão original do jogo hospedada no repositório.
+    const sourceUrl = 'https://raw.githubusercontent.com/maxwelcastro0-droid/Impostor/master/index.html';
+    const response = await fetch(sourceUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error('Não foi possível carregar o jogo original.');
+    let source = await response.text();
+
+    // A lista de candidatos deve incluir todos os jogadores ativos, exceto quem está votando.
+    source = source.replace(
+      /function eligibleCandidates\(voter\)\s*\{[\s\S]*?\n\}/,
+      `function eligibleCandidates(voter) {
+  return game.players.filter(p => p.alive && p.index !== voter.index);
+}`
+    );
+
+    // Remove a validação que restringia o voto aos jogadores empatados.
+    source = source.replace(
+      /    if\(game\.tieCandidates&&!game\.tieCandidates\.includes\(target\.index\)\) \{\s*alert\("Você só pode votar nos jogadores empatados\."\);return;\s*\}\s*/,
+      ''
+    );
+
+    // Ajusta os textos da interface para refletir a regra corrigida.
+    source = source.replace(
+      'Ninguém será eliminado nesta rodada. Conversem novamente e votem apenas nos jogadores empatados.',
+      'Ninguém será eliminado nesta rodada. Conversem novamente e, na próxima votação, todos os jogadores ainda ativos poderão receber votos.'
+    );
+    source = source.replace(
+      '${game.tieCandidates ? `<div class="notice">Empate anterior: na próxima votação, só poderão receber votos: ${game.tieCandidates.map(i=>escapeHTML(game.players.find(p=>p.index===i)?.name||"Jogador")).join(", ")}.</div>` : ""}',
+      ''
+    );
+
+    // Confere se os trechos críticos realmente foram encontrados antes de executar.
+    if (!source.includes('function eligibleCandidates(voter)') ||
+        source.includes('Você só pode votar nos jogadores empatados.')) {
+      throw new Error('A estrutura do código original mudou; a correção não pôde ser aplicada com segurança.');
+    }
+
+    document.open();
+    document.write(source);
+    document.close();
+  } catch (error) {
+    status.textContent = error.message + ' Verifique sua conexão com a internet e tente novamente.';
+  }
+})();
+</script>
+</body>
+</html>
